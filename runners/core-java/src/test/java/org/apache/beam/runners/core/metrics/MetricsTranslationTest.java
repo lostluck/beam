@@ -38,7 +38,7 @@ public class MetricsTranslationTest {
   // Transform names are arbitrary user-meaningful steps in processing
   private static final String TRANSFORM1 = "transform1";
   private static final String TRANSFORM2 = "transform2";
-  private static final String TRANSFORM2 = "transform3";
+  private static final String TRANSFORM3 = "transform3";
 
   // Namespaces correspond to different contexts for a metric
   private static final String NAMESPACE1 = "fakeNamespace1";
