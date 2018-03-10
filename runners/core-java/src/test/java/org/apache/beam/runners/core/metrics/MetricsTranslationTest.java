@@ -75,7 +75,7 @@ public class MetricsTranslationTest {
           .setNamespace(NAMESPACE2)
           .setName(DISTRIBUTION_NAME2)
           .build();
-  
+
   private static final BeamFnApi.Metrics.User.MetricName GAUGE_METRIC1 =
       BeamFnApi.Metrics.User.MetricName.newBuilder()
           .setNamespace(NAMESPACE1)
@@ -121,7 +121,7 @@ public class MetricsTranslationTest {
           .setMetricName(COUNTER_METRIC2)
           .setCounterData(BeamFnApi.Metrics.User.CounterData.newBuilder().setValue(0L))
           .build();
-  
+
   private static final BeamFnApi.Metrics.User GAUGE1 =
       BeamFnApi.Metrics.User.newBuilder()
           .setMetricName(GAUGE_METRIC2)
