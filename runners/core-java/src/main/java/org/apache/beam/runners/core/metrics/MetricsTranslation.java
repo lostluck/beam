@@ -42,7 +42,7 @@ public abstract class MetricsTranslation {
       String ptransformName, Collection<BeamFnApi.Metrics.User> userMetricUpdates) {
     List<MetricUpdates.MetricUpdate<Long>> counterUpdates = new ArrayList<>();
     List<MetricUpdates.MetricUpdate<DistributionData>> distributionUpdates = new ArrayList<>();
-    List<MetricUpdates.MetricUpdate<GaugeData>> gaugeUpdates = Collections.emptyList();
+    List<MetricUpdates.MetricUpdate<GaugeData>> gaugeUpdates = new ArrayList<>();
 
     for (BeamFnApi.Metrics.User userMetricUpdate : userMetricUpdates) {
       MetricKey metricKey =
@@ -62,6 +62,7 @@ public abstract class MetricsTranslation {
                       userMetricUpdate.getDistributionData().getCount(),
                       userMetricUpdate.getDistributionData().getMin(),
                       userMetricUpdate.getDistributionData().getMax())));
+          break;
         case GAUGE_DATA:
           gaugeUpdates.add(
               MetricUpdates.MetricUpdate.create(
