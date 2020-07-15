@@ -31,6 +31,11 @@ func init() {
 	runtime.RegisterFunction(enc)
 }
 
+type namedTypeForTest struct {
+	A, B int64
+	C    string
+}
+
 // TestMarshalUnmarshalCoders verifies that coders survive a proto roundtrip.
 func TestMarshalUnmarshalCoders(t *testing.T) {
 	foo := custom("foo", reflectx.Bool)
@@ -88,6 +93,26 @@ func TestMarshalUnmarshalCoders(t *testing.T) {
 		{
 			"CoGBK<foo,bar,baz>",
 			coder.NewCoGBK([]*coder.Coder{foo, bar, baz}),
+		},
+		{
+			name: "PW<bytes>!IWC",
+			c:    coder.NewPW(coder.NewBytes(), coder.NewIntervalWindow()),
+		},
+		{
+			name: "T<varint>!GWC",
+			c:    coder.NewT(coder.NewVarInt(), coder.NewGlobalWindow()),
+		},
+		{
+			name: "I<double>[[]float64]",
+			c:    coder.NewI(coder.NewDouble()),
+		},
+		{
+			name: "R[*graphx.namedTypeForTest]",
+			c:    coder.NewR(typex.New(reflect.TypeOf((*namedTypeForTest)(nil)))),
+		},
+		{
+			name: "window!GWC",
+			c:    &coder.Coder{Kind: coder.Window, Window: coder.NewGlobalWindow()},
 		},
 	}
 
