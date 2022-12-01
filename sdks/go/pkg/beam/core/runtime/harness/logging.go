@@ -17,6 +17,7 @@ package harness
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -24,7 +25,6 @@ import (
 	"time"
 
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/core/util/hooks"
-	"github.com/apache/beam/sdks/v2/go/pkg/beam/internal/errors"
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/log"
 	fnpb "github.com/apache/beam/sdks/v2/go/pkg/beam/model/fnexecution_v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -178,7 +178,6 @@ func (w *remoteWriter) connect(ctx context.Context) error {
 		// fmt.Fprintf(os.Stderr, "REMOTE: %v\n", proto.MarshalTextString(msg))
 
 		// TODO: batch up log messages
-
 		list := &fnpb.LogEntry_List{
 			LogEntries: []*fnpb.LogEntry{msg},
 		}

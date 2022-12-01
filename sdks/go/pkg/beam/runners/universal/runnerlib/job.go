@@ -114,10 +114,10 @@ func WaitForCompletion(ctx context.Context, client jobpb.JobServiceClient, jobID
 		case msg.GetStateResponse() != nil:
 			resp := msg.GetStateResponse()
 
-			log.Infof(ctx, "Job state: %v", resp.GetState().String())
+			Logf("Job state: %v", resp.GetState().String())
 
 			switch resp.State {
-			case jobpb.JobState_DONE, jobpb.JobState_CANCELLED:
+			case jobpb.JobState_DONE, jobpb.JobState_CANCELLED, jobpb.JobState_DRAINED, jobpb.JobState_UPDATED:
 				return nil
 			case jobpb.JobState_FAILED:
 				return errors.Errorf("job %v failed", jobID)
@@ -127,7 +127,7 @@ func WaitForCompletion(ctx context.Context, client jobpb.JobServiceClient, jobID
 			resp := msg.GetMessageResponse()
 
 			text := fmt.Sprintf("%v (%v): %v", resp.GetTime(), resp.GetMessageId(), resp.GetMessageText())
-			log.Output(ctx, messageSeverity(resp.GetImportance()), 1, text)
+			Logf("%v %v", messageSeverity(resp.GetImportance()), text)
 
 		default:
 			return errors.Errorf("unexpected job update: %v", proto.MarshalTextString(msg))

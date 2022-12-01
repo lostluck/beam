@@ -612,7 +612,6 @@ func (c *StateChannel) read(ctx context.Context) {
 		if err != nil {
 			c.terminateStreamOnError(err)
 			if err == io.EOF {
-				log.Warnf(ctx, "StateChannel[%v].read: closed", c.id)
 				return
 			}
 			log.Errorf(ctx, "StateChannel[%v].read bad: %v", c.id, err)

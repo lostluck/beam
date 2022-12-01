@@ -32,7 +32,6 @@ import (
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/runners/universal/extworker"
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/runners/universal/runnerlib"
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/runners/vet"
-	"github.com/golang/protobuf/proto"
 )
 
 func init() {
@@ -93,8 +92,6 @@ func Execute(ctx context.Context, p *beam.Pipeline) (beam.PipelineResult, error)
 		return nil, errors.WithContextf(err, "generating model pipeline")
 	}
 
-	log.Info(ctx, proto.MarshalTextString(pipeline))
-
 	opt := &runnerlib.JobOptions{
 		Name:         jobopts.GetJobName(),
 		Experiments:  jobopts.GetExperiments(),
@@ -102,6 +99,5 @@ func Execute(ctx context.Context, p *beam.Pipeline) (beam.PipelineResult, error)
 		RetainDocker: *jobopts.RetainDockerContainers,
 		Parallelism:  *jobopts.Parallelism,
 	}
-	presult, err := runnerlib.Execute(ctx, pipeline, endpoint, opt, *jobopts.Async)
-	return presult, err
+	return runnerlib.Execute(ctx, pipeline, endpoint, opt, *jobopts.Async)
 }

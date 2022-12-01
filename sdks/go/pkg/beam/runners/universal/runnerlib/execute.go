@@ -20,6 +20,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"io"
+	"log"
 	"os"
 	"time"
 
@@ -28,11 +29,17 @@ import (
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/metricsx"
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/core/util/protox"
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/internal/errors"
-	"github.com/apache/beam/sdks/v2/go/pkg/beam/log"
 	jobpb "github.com/apache/beam/sdks/v2/go/pkg/beam/model/jobmanagement_v1"
 	pipepb "github.com/apache/beam/sdks/v2/go/pkg/beam/model/pipeline_v1"
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/util/grpcx"
 )
+
+var logger = log.New(os.Stderr, "[beam] ", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
+
+// Logf prints to the beam logger.
+func Logf(format string, v ...interface{}) {
+	logger.Printf(format, v...)
+}
 
 // Execute executes a pipeline on the universal runner serving the given endpoint.
 // Convenience function.
@@ -44,7 +51,7 @@ func Execute(ctx context.Context, p *pipepb.Pipeline, endpoint string, opt *JobO
 	if bin == "" {
 		if self, ok := IsWorkerCompatibleBinary(); ok {
 			bin = self
-			log.Infof(ctx, "Using running binary as worker binary: '%v'", bin)
+			Logf("Using running binary as worker binary: '%v'", bin)
 		} else {
 			// Cross-compile as last resort.
 
@@ -57,7 +64,7 @@ func Execute(ctx context.Context, p *pipepb.Pipeline, endpoint string, opt *JobO
 			bin = worker
 		}
 	} else {
-		log.Infof(ctx, "Using specified worker binary: '%v'", bin)
+		Logf("Using specified worker binary: '%v'", bin)
 	}
 	// Update pipeline's Go environment to refer to the correct binary.
 	if err := UpdateGoEnvironmentWorker(bin, p); err != nil {
@@ -76,7 +83,7 @@ func Execute(ctx context.Context, p *pipepb.Pipeline, endpoint string, opt *JobO
 		return presult, err
 	}
 
-	log.Infof(ctx, "Prepared job with id: %v and staging token: %v", prepID, st)
+	Logf("Prepared job with id: %v and staging token: %v", prepID, st)
 
 	// (2) Stage artifacts.
 
@@ -85,7 +92,7 @@ func Execute(ctx context.Context, p *pipepb.Pipeline, endpoint string, opt *JobO
 		return presult, err
 	}
 
-	log.Infof(ctx, "Staged binary artifact with token: %v", token)
+	Logf("Staged binary artifact with token: %v", token)
 
 	// (3) Submit job
 
@@ -94,7 +101,7 @@ func Execute(ctx context.Context, p *pipepb.Pipeline, endpoint string, opt *JobO
 		return presult, err
 	}
 
-	log.Infof(ctx, "Submitted job: %v", jobID)
+	Logf("Submitted job: %v", jobID)
 
 	// (4) Wait for completion.
 

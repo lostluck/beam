@@ -114,7 +114,17 @@ func StageFile(filename string, stream jobpb.ArtifactStagingService_ReverseArtif
 	}
 	defer fd.Close()
 
-	data := make([]byte, 1<<20)
+	size := 1 << 20 // ~100MB as default
+	if stat, err := fd.Stat(); err == nil {
+		// if we can get information, we'll use it to allocate less.
+		if int(stat.Size()) < size {
+			size = int(stat.Size())
+		}
+		if size == 0 {
+			size = 64
+		}
+	}
+	data := make([]byte, size)
 	for {
 		n, err := fd.Read(data)
 		if n > 0 {

@@ -125,13 +125,13 @@ func Main(ctx context.Context, loggingEndpoint, controlEndpoint string) error {
 	go func() {
 		defer wg.Done()
 		for resp := range respc {
-			log.Debugf(ctx, "RESP: %v", proto.MarshalTextString(resp))
+			//log.Debugf(ctx, "RESP: %v", proto.MarshalTextString(resp))
 
 			if err := stub.Send(resp); err != nil {
 				log.Errorf(ctx, "control.Send: Failed to respond: %v", err)
 			}
 		}
-		log.Debugf(ctx, "control response channel closed")
+		//log.Debugf(ctx, "control response channel closed")
 	}()
 
 	sideCache := statecache.SideInputCache{}

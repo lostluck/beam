@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sync"
 )
 
 // Severity is the severity of the log message.
@@ -36,6 +37,25 @@ const (
 	SevFatal
 )
 
+func (s Severity) String() string {
+	switch s {
+	case SevDebug:
+		return " DBG"
+	case SevInfo:
+		return "INFO"
+	case SevWarn:
+		return "WARN"
+	case SevError:
+		return " ERR"
+	case SevFatal:
+		return " FTL"
+	case SevUnspecified:
+		fallthrough
+	default:
+		return "UNSP"
+	}
+}
+
 // Logger is a context-aware logging backend. The richer context allows for
 // more sophisticated logging setups. Must be concurrency safe.
 type Logger interface {
@@ -45,6 +65,7 @@ type Logger interface {
 }
 
 var (
+	rwmu   sync.RWMutex
 	logger Logger = &Standard{}
 )
 
@@ -54,12 +75,16 @@ func SetLogger(l Logger) {
 	if l == nil {
 		panic("Logger cannot be nil")
 	}
+	rwmu.Lock()
+	defer rwmu.Unlock()
 	logger = l
 }
 
 // Output logs the given message to the global logger. Calldepth is the count
 // of the number of frames to skip when computing the file name and line number.
 func Output(ctx context.Context, sev Severity, calldepth int, msg string) {
+	rwmu.RLock()
+	defer rwmu.RUnlock()
 	logger.Log(ctx, sev, calldepth+1, msg) // +1 for this frame
 }
 

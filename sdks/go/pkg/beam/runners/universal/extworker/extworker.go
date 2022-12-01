@@ -19,15 +19,18 @@ package extworker
 import (
 	"context"
 	"fmt"
+	"log"
 	"net"
+	"os"
 	"sync"
 
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/harness"
-	"github.com/apache/beam/sdks/v2/go/pkg/beam/log"
 	fnpb "github.com/apache/beam/sdks/v2/go/pkg/beam/model/fnexecution_v1"
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/util/grpcx"
 	"google.golang.org/grpc"
 )
+
+var logger = log.New(os.Stderr, "[extworker] ", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
 
 // StartLoopback initializes a Loopback ExternalWorkerService, at the given port.
 func StartLoopback(ctx context.Context, port int) (*Loopback, error) {
@@ -36,7 +39,7 @@ func StartLoopback(ctx context.Context, port int) (*Loopback, error) {
 		return nil, err
 	}
 
-	log.Infof(ctx, "starting Loopback server at %v", lis.Addr())
+	logger.Printf("starting server at %v", lis.Addr())
 	grpcServer := grpc.NewServer()
 	root, cancel := context.WithCancel(ctx)
 	s := &Loopback{lis: lis, root: root, rootCancel: cancel, workers: map[string]context.CancelFunc{},
@@ -62,7 +65,7 @@ type Loopback struct {
 
 // StartWorker initializes a new worker harness, implementing BeamFnExternalWorkerPoolServer.StartWorker.
 func (s *Loopback) StartWorker(ctx context.Context, req *fnpb.StartWorkerRequest) (*fnpb.StartWorkerResponse, error) {
-	log.Infof(ctx, "starting worker %v", req.GetWorkerId())
+	logger.Printf("starting worker %v", req.GetWorkerId())
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.workers[req.GetWorkerId()]; ok {
@@ -89,7 +92,7 @@ func (s *Loopback) StartWorker(ctx context.Context, req *fnpb.StartWorkerRequest
 
 // StopWorker terminates a worker harness, implementing BeamFnExternalWorkerPoolServer.StopWorker.
 func (s *Loopback) StopWorker(ctx context.Context, req *fnpb.StopWorkerRequest) (*fnpb.StopWorkerResponse, error) {
-	log.Infof(ctx, "stopping worker %v", req.GetWorkerId())
+	logger.Printf("stopping worker %v", req.GetWorkerId())
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if cancelfn, ok := s.workers[req.GetWorkerId()]; ok {
@@ -108,11 +111,11 @@ func (s *Loopback) Stop(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	log.Infof(ctx, "stopping Loopback, and %d workers", len(s.workers))
+	logger.Printf("stopping Loopback, and %d workers", len(s.workers))
 	s.workers = map[string]context.CancelFunc{}
 	s.lis.Close()
 	s.rootCancel()
-	s.grpcServer.GracefulStop()
+	s.grpcServer.Stop()
 	return nil
 }
 

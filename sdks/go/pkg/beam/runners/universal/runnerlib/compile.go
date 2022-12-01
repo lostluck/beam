@@ -30,7 +30,6 @@ import (
 	"sync/atomic"
 
 	"github.com/apache/beam/sdks/v2/go/pkg/beam/internal/errors"
-	"github.com/apache/beam/sdks/v2/go/pkg/beam/log"
 )
 
 // IsWorkerCompatibleBinary returns the path to itself and true if running
@@ -76,7 +75,7 @@ func BuildWorkerBinary(ctx context.Context, filename string) error {
 		return errors.New("could not detect user main")
 	}
 
-	log.Infof(ctx, "Cross-compiling %v as %v", program, filename)
+	Logf("Cross-compiling %v as %v", program, filename)
 
 	// Cross-compile given go program. Not awesome.
 	program = program[:strings.LastIndex(program, "/")+1]
